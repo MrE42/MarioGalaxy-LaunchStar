@@ -26,7 +26,7 @@ public class StarLauncher : MonoBehaviour
 
     [Space]
     [Header("Public References")]
-    public CinemachineFreeLook thirdPersonCamera;
+    //public CinemachineFreeLook thirdPersonCamera;
     public CinemachineDollyCart dollyCart;
     float cameraRotation;
     public Transform playerParent;
