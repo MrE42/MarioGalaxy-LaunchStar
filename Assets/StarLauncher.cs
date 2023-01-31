@@ -1,12 +1,14 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using Cinemachine;
+using UnityEngine.XR;
 
 public class StarLauncher : MonoBehaviour
 {
     Animator animator;
-    MovementInput movement;
+    //MovementInput movement;
     StarAnimation starAnimation;
     TrailRenderer trail;
 
@@ -22,7 +24,7 @@ public class StarLauncher : MonoBehaviour
     public bool flying;
     public bool almostFinished;
 
-    private Transform launchObject;
+    public Transform launchObject;
 
     [Space]
     [Header("Public References")]
@@ -41,18 +43,52 @@ public class StarLauncher : MonoBehaviour
     public ParticleSystem followParticles;
     public ParticleSystem smokeParticle;
 
+    private List<InputDevice> devices;
+    
+
     void Start()
     {
+        devices = new List<InputDevice>();
+        InputDevices.GetDevices(devices);
+
+        foreach (var item in devices)
+        {
+            Debug.Log(item.name + item.characteristics);
+        }
+        
+        
         animator = GetComponent<Animator>();
-        movement = GetComponent<MovementInput>();
+        //movement = GetComponent<MovementInput>();
         trail = dollyCart.GetComponentInChildren<TrailRenderer>();
     }
 
     void Update()
     {
         if (insideLaunchStar)
+        {
             if (Input.GetKeyDown(KeyCode.Space))
+            {
                 StartCoroutine(CenterLaunch());
+            }
+            else
+            {
+                bool trigger = false;
+                foreach (var targetDevice in devices)
+                {
+                    targetDevice.TryGetFeatureValue(CommonUsages.trigger, out float triggerValue);
+                    if (triggerValue > 0.1f)
+                    {
+                        trigger = true;
+                    }
+                }
+
+                if (trigger == true)
+                {
+                    StartCoroutine(CenterLaunch());
+                }
+            }
+        }
+            
 
 
         if (flying)
@@ -85,13 +121,13 @@ public class StarLauncher : MonoBehaviour
 
     IEnumerator CenterLaunch()
     {
-        movement.enabled = false;
+        //movement.enabled = false;
         transform.parent = null;
         DOTween.KillAll();
 
         //Checks to see if there is a Camera Trigger at the DollyTrack object - if there is activate its camera
-        if (launchObject.GetComponent<CameraTrigger>() != null)
-            launchObject.GetComponent<CameraTrigger>().SetCamera();
+        //if (launchObject.GetComponent<CameraTrigger>() != null)
+            //launchObject.GetComponent<CameraTrigger>().SetCamera();
 
         //Checks to see if there is a Camera Trigger at the DollyTrack object - if there is activate its camera
         if (launchObject.GetComponent<SpeedModifier>() != null)
@@ -153,7 +189,7 @@ public class StarLauncher : MonoBehaviour
         playerParent.DOComplete();
         dollyCart.enabled = false;
         dollyCart.m_Position = 0;
-        movement.enabled = true;
+        //movement.enabled = true;
         transform.parent = null;
 
         flying = false;
@@ -183,6 +219,7 @@ public class StarLauncher : MonoBehaviour
         {
             insideLaunchStar = true;
             launchObject = other.transform;
+            Debug.Log("Launch True");
         }
 
         if (other.CompareTag("CameraTrigger"))
@@ -194,6 +231,7 @@ public class StarLauncher : MonoBehaviour
         if (other.CompareTag("Launch"))
         {
             insideLaunchStar = false;
+            Debug.Log("Launch False");
         }
     }
 }
