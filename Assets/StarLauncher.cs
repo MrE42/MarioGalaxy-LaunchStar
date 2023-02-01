@@ -21,6 +21,7 @@ public class StarLauncher : MonoBehaviour
     [Space]
     [Header("Booleans")]
     public bool insideLaunchStar;
+    public bool initiate = false;
     public bool flying;
     public bool almostFinished;
 
@@ -66,26 +67,10 @@ public class StarLauncher : MonoBehaviour
     {
         if (insideLaunchStar)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space) || initiate)
             {
                 StartCoroutine(CenterLaunch());
-            }
-            else
-            {
-                bool trigger = false;
-                foreach (var targetDevice in devices)
-                {
-                    targetDevice.TryGetFeatureValue(CommonUsages.trigger, out float triggerValue);
-                    if (triggerValue > 0.1f)
-                    {
-                        trigger = true;
-                    }
-                }
-
-                if (trigger == true)
-                {
-                    StartCoroutine(CenterLaunch());
-                }
+                initiate = false;
             }
         }
             
